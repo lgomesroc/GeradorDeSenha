@@ -1,0 +1,19 @@
+generate-password:
+  length: 12
+
+save-password:
+  valid-password: "SenhaTesteSegura123"
+  invalid-password: ""
+
+list-passwords:
+  passwords:
+    - "$2y$10$XyPqwPivBEHZuxFPAWkA3uuiGNgJRw1pqO4IUpU"
+    - "$2y$10$zIfPZR3NHvdfDZXhwG6uPO5PyBC8azLoHJEQXYk"
+    - "$2y$10$Fk2OnBAcxoPV5cRY9EGQzIqxo62WLcHTLMN9QPj"
+
+generate-token:
+  username: "luciano"
+
+validate-token:
+  valid-token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJhdWQiOiJsb2NhbGhvc3QiLCJpYXQiOjE3NDM1MjA5MDMsImV4cCI6MTc0MzUyNDUwMywidXNlcm5hbWUiOiJsdWNpYW5vIn0.0bqVR6cEQizujfFAVQ8Wrvm_CjNjD0XFcMWU-dWl5-4"
+  invalid-token: "invalidToken123"
