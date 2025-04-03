@@ -1,0 +1,26 @@
+# Ignorar arquivos relacionados ao Git
+.git
+.gitignore
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar dependências locais e cache
+vendor/
+node_modules/
+*.cache
+
+# Ignorar arquivos temporários e de build
+*.env
+*.bak
+*.tmp
+*.swp
+
+# Ignorar configurações específicas do editor
+.vscode/
+.idea/
+.DS_Store
+
+# Ignorar arquivos desnecessários para produção
+tests/
+docs/

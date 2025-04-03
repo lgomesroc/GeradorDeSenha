@@ -24,6 +24,7 @@ O objetivo é demonstrar uma aplicação simples que integra frontend e backend,
 - **Vue.js**
 - **Axios** (para requisições HTTP)
 - **Docker** (para containerização)
+- **Vue Router** (para gerenciamento de rotas)
 
 ---
 
@@ -51,26 +52,9 @@ docker-compose up --build
 - **Gerar senha:** http://localhost:9000/generate-password
 
 4. Para o frontend, acesse:
-- **Interface de usuário:** http://localhost:8080
+- **Interface de usuário:** http://localhost:8081
 - Clique no botão "Gerar Senha" para gerar uma senha dinâmica.
 
-## Estrutura do Projeto
-```
-PasswordGenerator/
-├── backend/                  # Código do backend (Flight PHP)
-│   ├── public/               # Arquivos públicos (index.php)
-│   ├── composer.json         # Gerenciador de dependências do backend
-│   └── Dockerfile            # Configuração do Docker para o backend
-├── frontend/                 # Código do frontend (Vue.js)
-│   ├── src/                  # Código-fonte do Vue.js
-│   │   ├── components/       # Componentes Vue
-│   │   │   └── PasswordGenerator.vue
-│   │   └── axios.js          # Configuração do Axios
-│   ├── package.json          # Gerenciador de dependências do frontend
-│   └── Dockerfile            # Configuração do Docker para o frontend
-├── docker-compose.yml        # Configuração do Docker Compose
-└── README.md                 # Documentação do projeto
-```
 
 ### Funcionalidades
 - **Gerar Senhas:** Gera senhas aleatórias e seguras com caracteres alfanuméricos.
@@ -100,18 +84,33 @@ PasswordGenerator/
 - Adicionado `PHPUnit` para testes automatizados robustos.
 - Adicionadas validações para entradas nas rotas do backend (ex.: verificação de campos obrigatórios como password e formatação de erros detalhada).
 - Implementado tratamento de erros genéricos com mapeamento centralizado no backend.
+- Criada a rota `/register` para cadastro de usuários com nome, email e senha.
+- Criada a rota `/login` para autenticação de usuários e retorno de tokens JWT.
+- Implementada rota `/update-user` para atualização de informações de usuários (nome e email).
+- Implementada rota `/update-password` para alteração de senha do usuário.
+- Criada a rota `/delete-user` para exclusão de usuários e suas senhas associadas, com confirmação.
+- Configurado tratamento de erros detalhados em todas as novas rotas.
+
 
 #### Frontend
-- Configuração inicial com Vue.js..
+- Configuração inicial com Vue.js.
 - Integrado Axios para comunicação com o backend.
-- Criado o componente PasswordGenerator.vue para gerar e exibir senhas aleatórias.
+- Criado o componente **PasswordGenerator.vue** para gerar e exibir senhas aleatórias.
 - Configuração do Docker para containerização do frontend.
 - Atualizado o componente PasswordGenerator.vue para salvar as senhas geradas no banco de dados através da rota /save-password.
 - Adicionado evento para atualizar automaticamente a lista de senhas salvas após gerar uma nova senha.
-- Corrigido o componente ListPasswords.vue para tratar mensagens malformadas antes do JSON retornado pelo backend.
-- Garantido que o componente ListPasswords.vue exiba as senhas salvas corretamente a partir da rota /list-passwords.
-- Criado o componente TokenValidationForm.vue para validar tokens JWT através da rota /validate-token.
-- Atualizado o App.vue para integrar o novo componente TokenValidationForm.vue no fluxo principal.
+- Corrigido o componente **ListPasswords.vue** para tratar mensagens malformadas antes do JSON retornado pelo backend.
+- Garantido que o componente **ListPasswords.vue** exiba as senhas salvas corretamente a partir da rota /list-passwords.
+- Criado o componente **TokenValidationForm.vue** para validar tokens JWT através da rota /validate-token.
+- Atualizado o **App.vue** para integrar o novo componente TokenValidationForm.vue no fluxo principal.
+- Criado o componente **LoginForm.vue** para autenticação de usuários.
+- Criado o componente **RegisterUser.vue** para cadastro de novos usuários.
+- Criado o componente **UpdateUser.vue** para permitir a atualização de nome e email.
+- Criado o componente **UpdatePassword.vue** para alteração de senha do usuário.
+- Criado o componente **DeleteUser.vue** para exclusão de usuários e senhas associadas, com aviso de confirmação.
+- Adicionado botão de logout no componente **PasswordGenerator.vue** para permitir que usuários saiam do sistema.
+- Adicionado suporte ao Vue Router para gerenciamento de rotas no frontend.
+- Atualizado o `App.vue` para integrar o Vue Router e redirecionar automaticamente `/` para `/login`.
 
 
 ### Funcionalidades Planejadas
@@ -177,5 +176,53 @@ Melhorar o README.md com mais detalhes sobre as rotas disponíveis e como contri
 - Adicionar visualização de segurança relativa para cada senha gerada.
 - Criar autenticação de login no frontend integrado com o JWT do backend.
 - Configurar testes de interface para validar funcionalidade e design.
+- Melhorar acessibilidade (ex.: suporte para leitores de tela).
+- Adicionar sistema de exportação de senhas em formato CSV ou PDF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### **Funcionalidades Planejadas - Pendente**
+
+#### Backend:
+- Implementar validação de entradas mais robusta com **yup** ou **joi**.
+- Implementar sistema de notificações em tempo real (ex.: **Socket.IO** para eventos).
+- Adicionar verificações para evitar duplicatas ao salvar senhas.
+- Configurar expiração automática de senhas antigas no banco.
+- Configurar autenticação de dois fatores (2FA).
+- Adicionar suporte para envio de notificações (ex.: e-mail ou SMS).
+- Criar documentação automatizada das rotas com **OpenAPI/Swagger**.
+- Adicionar suporte para múltiplos bancos de dados (PostgreSQL, etc.).
+- Configurar HTTPS com certificados SSL.
+- Implementar cache para melhorar o desempenho.
+- Adicionar suporte para uploads e armazenamento seguro de arquivos.
+- Integrar APIs externas relacionadas à segurança.
+
+#### Frontend:
+- Implementar paginação na listagem de senhas salvas.
+- Adicionar funcionalidade de busca para encontrar senhas específicas.
+- Melhorar personalização visual com tema escuro/claro.
+- Criar gráficos interativos sobre o uso de senhas.
+- Implementar notificações em tempo real após ações (ex.: geração/salvamento).
+- Adicionar botão para copiar senhas geradas para a área de transferência.
+- Configurar suporte offline para armazenamento local de senhas temporárias.
+- Configurar tradução para múltiplos idiomas.
 - Melhorar acessibilidade (ex.: suporte para leitores de tela).
 - Adicionar sistema de exportação de senhas em formato CSV ou PDF.

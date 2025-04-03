@@ -1,44 +1,50 @@
 # Use a imagem oficial do PHP com FPM como base
 FROM php:8.2-fpm
 
-# Instale dependências do sistema
-RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libonig-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    git \
-    curl
-
-# Instale extensões PHP necessárias, incluindo PDO MySQL e BCMath
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-
-# Instale o Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
 # Configure o diretório de trabalho
 WORKDIR /var/www
 
-# Copie o código do backend para o contêiner
+# Atualize os pacotes do sistema
+RUN apt-get update
+
+# Instale bibliotecas de imagem
+RUN apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev
+
+# Instale utilitários de compactação
+RUN apt-get install -y zip unzip
+
+# Instale ferramentas de controle de versão e rede
+RUN apt-get install -y git curl
+
+# Instale a biblioteca oniguruma (necessária para mbstring)
+RUN apt-get install -y libonig-dev
+
+# Configure e instale a extensão GD
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install gd
+
+# Instale extensões PHP separadamente
+RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install mbstring
+RUN docker-php-ext-install bcmath
+
+# Limpeza para reduzir o tamanho da imagem
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Copie o Composer diretamente de sua imagem oficial
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Copie os arquivos do projeto para o contêiner
 COPY . .
 
 # Instale as dependências do Composer
-RUN composer install
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Instale PHPUnit para testes automatizados
-RUN composer require --dev phpunit/phpunit
+# Ajuste permissões do diretório de trabalho
+RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www
 
-# Instale Symfony YAML para manipulação de arquivos .yaml
-RUN composer require symfony/yaml
-
-# Conceda permissões ao diretório
-RUN chown -R www-data:www-data /var/www
-
-# Exponha a porta para o backend
+# Exponha a porta usada pelo Flight PHP
 EXPOSE 9000
 
-# Inicie o servidor PHP embutido
+# Comando para iniciar o servidor PHP embutido
 CMD ["php", "-S", "0.0.0.0:9000", "-t", "public"]
