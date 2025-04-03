@@ -19,8 +19,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
-          cpus: "0.50"
+          memory: 768M # Aumentado para suportar melhor o backend
+          cpus: "0.75"
 
   frontend:
     build:
@@ -30,12 +30,12 @@ services:
     volumes:
       - ./frontend:/app
     ports:
-      - "8080:8080"
+      - "8081:8081" # Certifique-se de usar a porta correta no mapeamento
     deploy:
       resources:
         limits:
-          memory: 256M
-          cpus: "0.25"
+          memory: 512M # Aumentado para suportar a recompilação do frontend
+          cpus: "0.50"
 
   db:
     image: mysql:8
@@ -43,8 +43,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: password_generator_db
-      MYSQL_USER: password_user # Defina um usuário regular
-      MYSQL_PASSWORD: password123 # Senha para o usuário regular
+      MYSQL_USER: password_user
+      MYSQL_PASSWORD: password123
     ports:
       - "3306:3306"
     volumes:

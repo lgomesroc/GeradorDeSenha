@@ -40,7 +40,7 @@
   
         // Envio ao backend
         axios
-          .post("http://localhost:9000/save-password", { password: this.password })
+          .post("http://localhost:9001/save-password", { password: this.password })
           .then((response) => {
             this.success = response.data.message;
           })

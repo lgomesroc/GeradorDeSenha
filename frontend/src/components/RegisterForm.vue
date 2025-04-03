@@ -33,7 +33,7 @@
       async register() {
         try {
           this.error = '';
-          const response = await axios.post('http://localhost:9000/register', {
+          const response = await axios.post('http://localhost:9001/register', {
             username: this.username,
             password: this.password
           });

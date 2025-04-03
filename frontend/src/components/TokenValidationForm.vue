@@ -38,7 +38,7 @@
         this.error = "";
   
         axios
-          .get("http://localhost:9000/validate-token", {
+          .get("http://localhost:9001/validate-token", {
             headers: {
               Authorization: `Bearer ${this.token}`,
             },

@@ -54,7 +54,7 @@
         try {
           console.log("Buscando senhas salvas...");
           
-          const response = await axios.get('http://localhost:9000/list-passwords', {
+          const response = await axios.get('http://localhost:9001/list-passwords', {
             // Configurações adicionais para ajudar com problemas de CORS
             withCredentials: false,
             headers: {

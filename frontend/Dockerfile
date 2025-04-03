@@ -7,8 +7,11 @@ WORKDIR /app
 # Copie os arquivos de configuração (package.json e package-lock.json) para o contêiner
 COPY package*.json ./
 
-# Instale as dependências do Node.js automaticamente (incluindo Axios e Vue Router)
+# Instale as dependências do Node.js
 RUN npm install
+
+# Garanta que o Vue Router seja instalado
+RUN npm install vue-router
 
 # Instale o Vue CLI globalmente para gerenciar o projeto Vue
 RUN npm install -g @vue/cli

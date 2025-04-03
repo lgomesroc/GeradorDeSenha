@@ -37,23 +37,73 @@ O objetivo é demonstrar uma aplicação simples que integra frontend e backend,
 ### Instruções
 1. Clone este repositório:
    ```
-   git clone https://github.com/seu-usuario/password-generator.git
-   cd password-generator
+   git clone https://github.com/lgomesroc/GeradorDeSenha.git
+   cd GeradorDeSenha
    ```
 2. Construa os contêineres:
 ```
 docker-compose up --build
 ```
 
-3. Acesse o backend no navegador:
+## **Como Executar o Sistema**
 
-= **Rota inicial:** http://localhost:9000
-- **Testar conexão com o banco:** http://localhost:9000/db-test
-- **Gerar senha:** http://localhost:9000/generate-password
+Após construir e iniciar os contêineres, siga os comandos abaixo para executar o backend, o frontend e o banco de dados MySQL:
 
-4. Para o frontend, acesse:
+### **Backend**
+1. Certifique-se de que o contêiner do backend está ativo.
+
+2. Acesse o terminal do contêiner do backend:
+```
+docker exec -it backend bash
+```
+
+3. Execute o comando para iniciar o backend:
+```
+php -S 0.0.0.0:9001
+```
+
+4. O backend estará acessível em http://localhost:9001.
+
+### **Frontend**
+1. Certifique-se de que o contêiner do frontend está ativo.
+
+2. Acesse o terminal do contêiner do frontend:
+```
+docker exec -it frontend bash
+```
+
+3. Execute o comando para iniciar o frontend no modo de desenvolvimento:
+```
+npm run serve
+```
+
+4. O frontend estará acessível em http://localhost:8081.
+
+### **Banco de Dados MySQL**
+1. Certifique-se de que o contêiner do MySQL está ativo.
+
+2. Para acessar o banco de dados MySQL diretamente:
+```
+docker exec -it mysql bash
+```
+
+3. Dentro do contêiner, conecte-se ao MySQL:
+```
+mysql -u password_user -p
+```
+4. Insira a senha configurada no contêiner para acessar o MySQL. A partir daí, você pode executar comandos SQL diretamente.
+
+
+
+### URLs
+1. Acesse o backend no navegador:
+
+= **Rota inicial:** http://localhost:9001
+- **Testar conexão com o banco:** http://localhost:9001/db-test
+- **Gerar senha:** http://localhost:9001/generate-password
+
+2. Para o frontend, acesse:
 - **Interface de usuário:** http://localhost:8081
-- Clique no botão "Gerar Senha" para gerar uma senha dinâmica.
 
 
 ### Funcionalidades
