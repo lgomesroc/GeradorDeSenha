@@ -1,4 +1,4 @@
-# Password Generator Project
+# Projeto gerador de senhas
 
 ## Descrição
 Este projeto consiste em um **Gerador de Senhas** construído com:
@@ -19,6 +19,12 @@ O objetivo é demonstrar uma aplicação simples que integra frontend e backend,
 - **bcrypt** (para criptografia de senhas)
 - **Symfony YAML** (para manipulação de arquivos .yaml)
 - **PHPUnit** (para testes automatizados)
+- **Nginx**: Para servir os arquivos do Swagger UI.
+- **curl**: Para download do Swagger UI.
+- **unzip**: Para extração do arquivo ZIP baixado do Swagger UI.
+- **Swagger UI**
+   - Versão: **4.15.5**.
+   - Caminho de instalação: `/usr/share/nginx/html/swagger-ui/`.
 
 ### Frontend
 - **Vue.js**
@@ -45,7 +51,9 @@ O objetivo é demonstrar uma aplicação simples que integra frontend e backend,
 docker-compose up --build
 ```
 
-## **Como Executar o Sistema**
+---
+
+## Como executar o sistema
 
 Após construir e iniciar os contêineres, siga os comandos abaixo para executar o backend, o frontend e o banco de dados MySQL:
 
@@ -59,10 +67,10 @@ docker exec -it backend bash
 
 3. Execute o comando para iniciar o backend:
 ```
-php -S 0.0.0.0:9001
+php -S 0.0.0.0:9000
 ```
 
-4. O backend estará acessível em http://localhost:9001.
+4. O backend estará acessível em http://localhost:9000.
 
 ### **Frontend**
 1. Certifique-se de que o contêiner do frontend está ativo.
@@ -93,27 +101,60 @@ mysql -u password_user -p
 ```
 4. Insira a senha configurada no contêiner para acessar o MySQL. A partir daí, você pode executar comandos SQL diretamente.
 
+---
 
+## **Detalhes de Configuração**
+### ** Instalação do Swagger UI**
+1. **Criação do diretório**:
+   - Criado o diretório `/usr/share/nginx/html/swagger-ui` para armazenar os arquivos do Swagger UI.
 
-### URLs
+2. **Download do Swagger UI**:
+   - O arquivo ZIP do Swagger UI foi baixado da URL oficial:
+     ```
+     https://github.com/swagger-api/swagger-ui/archive/refs/tags/v4.15.5.zip
+     ```
+
+3. **Extração e Organização dos Arquivos**:
+   - Os arquivos foram extraídos e movidos para o diretório apropriado:
+     - Arquivos finais: `/usr/share/nginx/html/swagger-ui/`.
+   - Removidos os arquivos temporários (`swagger-ui.zip` e diretórios desnecessários).
+
+### ** Portas Expostas**
+- **9000**: Porta principal para o servidor PHP (Flight PHP).
+- **8080**: Porta para acesso ao Swagger UI.
+
+---
+
+## Rotas do Backend
+- **POST** `/login`: autentica o usuário e retorna um token JWT.
+- **POST** `/register`: registra um novo usuário.
+- **GET** `/validate-token`: valida o token JWT enviado pelo frontend.
+- **POST** `/generate-password`: gera uma nova senha.
+- **GET** `/list-passwords`: retorna a lista de senhas geradas.
+
+---
+
+## URLs
 1. Acesse o backend no navegador:
 
-= **Rota inicial:** http://localhost:9001
-- **Testar conexão com o banco:** http://localhost:9001/db-test
-- **Gerar senha:** http://localhost:9001/generate-password
+= **Rota inicial:** http://localhost:9000
+- **Testar conexão com o banco:** http://localhost:9000/db-test
+- **Gerar senha:** http://localhost:9000/generate-password
 
 2. Para o frontend, acesse:
 - **Interface de usuário:** http://localhost:8081
 
+---
 
-### Funcionalidades
+## Funcionalidades
 - **Gerar Senhas:** Gera senhas aleatórias e seguras com caracteres alfanuméricos.
 - **Salvar Senhas:** Armazena as senhas no banco de dados.
 - **Listar Senhas:** (Planejado) Exibir as senhas armazenadas.
 
+---
 
-### Histórico do Projeto
-#### Backend
+## Histórico do Projeto
+### Backend
 - Configuração inicial com Flight PHP para gerenciar rotas.
 - Adicionada rota `/generate-password` para gerar senhas aleatórias.
 - Configuração do Docker para containerização do backend.
@@ -140,9 +181,12 @@ mysql -u password_user -p
 - Implementada rota `/update-password` para alteração de senha do usuário.
 - Criada a rota `/delete-user` para exclusão de usuários e suas senhas associadas, com confirmação.
 - Configurado tratamento de erros detalhados em todas as novas rotas.
+- Configurado o servidor do backend para rodar na porta 9001.
+- Implementada a validação de tokens JWT em todas as rotas protegidas para garantir a segurança e autenticação dos usuários.
+- Configurado o **Swagger UI** no backend para documentação e teste das APIs.
+- Acessível na porta `8080`.
 
-
-#### Frontend
+### Frontend
 - Configuração inicial com Vue.js.
 - Integrado Axios para comunicação com o backend.
 - Criado o componente **PasswordGenerator.vue** para gerar e exibir senhas aleatórias.
@@ -161,6 +205,50 @@ mysql -u password_user -p
 - Adicionado botão de logout no componente **PasswordGenerator.vue** para permitir que usuários saiam do sistema.
 - Adicionado suporte ao Vue Router para gerenciamento de rotas no frontend.
 - Atualizado o `App.vue` para integrar o Vue Router e redirecionar automaticamente `/` para `/login`.
+- Configurado o frontend para enviar requisições ao backend na porta 9001 em vez de 9000.
+- Ajustado o botão "Entrar" na tela de login para redirecionar corretamente o usuário para o Dashboard na rota /password-generator.
+- Implementado o recurso de mostrar/ocultar senha com um ícone de olho (👁️) em:
+  - Tela de Login (**LoginForm.vue**).
+  - Tela de Cadastro de Usuário (RegisterUser.vue).
+  - Tela de Atualização de Senha (UpdatePassword.vue).
+- Adicionado o botão "Gerar Senha" para criar novas senhas no dashboard.
+- Implementada a validação do token JWT para garantir que o usuário esteja autenticado ao acessar o dashboard.
+- Adicionado um botão de logout para sair manualmente do sistema.
+- Adicionado um timer de 30 minutos para logout automático por inatividade.
+- Restrições Adicionadas e consertadas:
+  - Desativado o salvamento automático de login e senha (autocomplete="off").
+  - Bloqueadas ações de copiar, colar e cortar nos campos de entrada.
+  - Bloqueado o botão direito do mouse.
+  - Bloqueado salvamento automático de login e senha no navegador.
+  - Implementados eventos para bloquear copiar, colar, cortar e uso do botão direito.
+  - Melhorias na Experiência do Usuário:
+  - Bloqueado o botão direito e funcionalidades de copiar, colar e cortar no campo de entrada de token.
+  - Bloqueio do Botão Direito:
+  - Prevenção do uso do botão direito do mouse em toda a tela.
+  - Impedir Seleção de Senhas.
+  - Adicionado user-select: none; no CSS para impedir que senhas sejam selecionadas.
+  - Listener global implementado para bloquear qualquer tentativa de seleção de texto na página.
+  - Timer de Logout Automático:
+  - Garantido que o usuário seja deslogado automaticamente após 30 minutos de inatividade, com precisão.
+  - Botão "Gerar Senha" continua funcional e interativo.
+- Atualização: Recuperação de Senha**
+  - Criada uma nova tela de **Recuperação de Senha** (`RecoverPassword.vue`).
+  - Tela permite que os usuários solicitem a recuperação de senha ao fornecer o e-mail.
+  - Implementado bloqueio de copiar, colar, cortar e selecionar no campo de e-mail.
+  - Adicionado o timer de inatividade para deslogar automaticamente após **30 minutos**.
+  - Resolvido o problema de tela em branco, garantindo renderização correta dos componentes.
+  - Incluído link para voltar à Tela de Login.
+- **Adicionado limite de tentativas de login para evitar ataques de força bruta:**
+  - Usuários têm **3 tentativas** para fazer login corretamente.
+  - Após cada erro, é exibida uma mensagem com o número de tentativas restantes.
+  - Em caso de 3 tentativas falhas consecutivas, o usuário é **bloqueado por 1 hora**.
+  - Estado de bloqueio é gerenciado pela variável `isBlocked`, e o número de tentativas restantes por `attemptsLeft`.
+  - Mensagens dinâmicas foram adicionadas para indicar tentativas restantes e estado de bloqueio.
+- Adicionado alternador de tema (modo claro/escuro) com persistência via localStorage em todas as telas.
+- Estilização refinada para melhorar a experiência do usuário.
+- Tela de Recuperação de Senha (RecoverPassword.vue)
+  - Implementada a funcionalidade de envio de e-mail de recuperação de senha.
+  - Adicionado alternador de tema com persistência.
 
 
 ### Funcionalidades Planejadas
@@ -171,10 +259,7 @@ Implementar validação de entradas com yup ou joi.
 
 Adicionar sistema de notificações em tempo real com socket.io.
 
-1. Listar Senhas Salvas
-Criar uma rota no backend para retornar todas as senhas armazenadas no banco de dados.
 
-Isso permitirá que o frontend ou um cliente visualize as senhas salvas.
 
 2. Validação e Segurança
 Evitar duplicatas: Implementar uma verificação para evitar que a mesma senha seja salva mais de uma vez.
@@ -183,9 +268,8 @@ Regras de geração: Adicionar configurações para que o usuário defina o comp
 
 
 3. Expandir Funcionalidades
-Implementar o front-end para exibir senhas geradas e permitir salvar diretamente pela interface.
+permitir salvar diretamente pela interface.
 
-Adicionar filtros no front-end para buscar senhas salvas com base em data ou outros critérios.
 
 4. Documentação
 Melhorar o README.md com mais detalhes sobre as rotas disponíveis e como contribuir para o projeto.
@@ -198,7 +282,6 @@ Melhorar o README.md com mais detalhes sobre as rotas disponíveis e como contri
 #### Backend:
 - Implementar autenticação baseada em níveis de acesso (admin, usuário, etc.).
 - Adicionar rotas para deletar senhas específicas do banco de dados.
-- Implementar limite de tentativas de login para evitar ataques de força bruta.
 - Adicionar logs detalhados de todas as solicitações feitas ao backend.
 - Configurar HTTPS com certificados SSL para segurança.
 - Integrar suporte a múltiplos bancos de dados (ex.: PostgreSQL).
@@ -206,16 +289,13 @@ Melhorar o README.md com mais detalhes sobre as rotas disponíveis e como contri
 - Implementar cache para melhorar o desempenho de rotas mais acessadas.
 - Adicionar suporte para envio de notificações (ex.: e-mail ou SMS) após ações específicas.
 - Configurar autenticação de dois fatores (2FA).
-- Criar documentação automatizada das rotas com OpenAPI/Swagger.
 - Adicionar suporte para uploads e armazenamento de arquivos de senhas em formato seguro.
 - Implementar validação mais robusta nos dados de entrada das rotas.
 - Adicionar integração com serviços externos como APIs de segurança.
-- Criar testes automatizados para validar o funcionamento do backend.
 
 #### Frontend:
 - Implementar paginação na listagem de senhas salvas.
 - Criar funcionalidade de busca para encontrar senhas específicas.
-- Adicionar tema escuro/claro para personalização visual.
 - Criar gráficos interativos sobre o uso de senhas (ex.: número de senhas geradas).
 - Implementar notificações em tempo real após gerar ou salvar senhas.
 - Adicionar botão para copiar senhas geradas para a área de transferência.
@@ -224,7 +304,6 @@ Melhorar o README.md com mais detalhes sobre as rotas disponíveis e como contri
 - Adicionar suporte offline com armazenamento local para senhas temporárias.
 - Implementar formulário de contato com integração para enviar feedback.
 - Adicionar visualização de segurança relativa para cada senha gerada.
-- Criar autenticação de login no frontend integrado com o JWT do backend.
 - Configurar testes de interface para validar funcionalidade e design.
 - Melhorar acessibilidade (ex.: suporte para leitores de tela).
 - Adicionar sistema de exportação de senhas em formato CSV ou PDF.
@@ -258,7 +337,6 @@ Melhorar o README.md com mais detalhes sobre as rotas disponíveis e como contri
 - Configurar expiração automática de senhas antigas no banco.
 - Configurar autenticação de dois fatores (2FA).
 - Adicionar suporte para envio de notificações (ex.: e-mail ou SMS).
-- Criar documentação automatizada das rotas com **OpenAPI/Swagger**.
 - Adicionar suporte para múltiplos bancos de dados (PostgreSQL, etc.).
 - Configurar HTTPS com certificados SSL.
 - Implementar cache para melhorar o desempenho.
@@ -268,7 +346,6 @@ Melhorar o README.md com mais detalhes sobre as rotas disponíveis e como contri
 #### Frontend:
 - Implementar paginação na listagem de senhas salvas.
 - Adicionar funcionalidade de busca para encontrar senhas específicas.
-- Melhorar personalização visual com tema escuro/claro.
 - Criar gráficos interativos sobre o uso de senhas.
 - Implementar notificações em tempo real após ações (ex.: geração/salvamento).
 - Adicionar botão para copiar senhas geradas para a área de transferência.

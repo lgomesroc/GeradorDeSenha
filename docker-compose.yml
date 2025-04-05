@@ -29,6 +29,9 @@ services:
     container_name: frontend
     volumes:
       - ./frontend:/app
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+
     ports:
       - "8081:8081" # Certifique-se de usar a porta correta no mapeamento
     deploy:

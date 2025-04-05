@@ -65,6 +65,36 @@ Flight::route('GET /generate-password', function() use ($key) {
     }
 });
 
+// Rota para recuperar senha
+Flight::route('POST /recover-password', function() {
+    $request = Flight::request()->data;
+
+    if (!isset($request->email) || !filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
+        Flight::halt(400, json_encode(['error' => 'E-mail inválido ou ausente.']));
+        return;
+    }
+
+    $email = $request->email;
+
+    try {
+        // Verificar se o e-mail existe na tabela de usuários
+        $user = Capsule::table('users')->where('email', $email)->first();
+
+        if (!$user) {
+            Flight::halt(404, json_encode(['error' => 'E-mail não encontrado.']));
+            return;
+        }
+
+        // Simular envio de e-mail de recuperação
+        // Em um cenário real, utilize um serviço como SMTP, Mailgun, etc.
+        $recoveryLink = "http://localhost:8081/reset-password?email=$email&token=" . bin2hex(random_bytes(16));
+
+        echo json_encode(['message' => 'E-mail de recuperação enviado com sucesso!', 'link' => $recoveryLink]);
+    } catch (Exception $e) {
+        Flight::halt(500, json_encode(['error' => 'Erro ao processar solicitação de recuperação de senha.', 'details' => $e->getMessage()]));
+    }
+});
+
 // Rota para salvar uma senha no banco
 Flight::route('POST /save-password', function() {
     $request = Flight::request()->data;

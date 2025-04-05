@@ -16,6 +16,9 @@ RUN npm install vue-router
 # Instale o Vue CLI globalmente para gerenciar o projeto Vue
 RUN npm install -g @vue/cli
 
+# Instale o Vuetify diretamente como dependência
+RUN npm install vuetify
+
 # Copie todo o código do frontend para o contêiner
 COPY . .
 

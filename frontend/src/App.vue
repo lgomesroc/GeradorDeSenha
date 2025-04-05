@@ -1,7 +1,11 @@
 <template>
-  <div id="app">
-    <router-view />
-  </div>
+  <v-app>
+    <v-main>
+      <v-container>
+        <router-view />
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
@@ -20,5 +24,10 @@ export default {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+}
+
+/* Adicione estilos do Vuetify, caso necessário */
+.v-app {
+  background-color: #f5f5f5; /* Tema claro de exemplo */
 }
 </style>

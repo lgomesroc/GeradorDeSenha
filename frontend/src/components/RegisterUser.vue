@@ -1,18 +1,31 @@
 <template>
-  <div class="register-form">
+  <div class="register-form" @contextmenu.prevent>
     <h2>Registrar Novo Usuário</h2>
-    <form @submit.prevent="register">
+    <form @submit.prevent="register" autocomplete="off">
       <div>
         <label for="username">Usuário:</label>
-        <input v-model="username" id="username" type="text" placeholder="Digite seu nome de usuário" />
+        <input 
+          v-model="username" 
+          id="username" 
+          type="text" 
+          placeholder="Digite seu nome de usuário" 
+          autocomplete="off" 
+          @copy.prevent 
+          @paste.prevent 
+          @cut.prevent 
+        />
       </div>
-      <div class="password-field">
+      <div class="password-field" @contextmenu.prevent>
         <label for="password">Senha:</label>
         <input 
           v-model="password" 
           :type="showPassword ? 'text' : 'password'" 
           id="password" 
           placeholder="Digite sua senha" 
+          autocomplete="off" 
+          @copy.prevent 
+          @paste.prevent 
+          @cut.prevent 
         />
         <button type="button" class="toggle-password" @click="togglePasswordVisibility">
           {{ showPassword ? '🙈' : '👁️' }}
@@ -21,10 +34,20 @@
       <p v-if="error" class="error">{{ error }}</p>
       <p v-if="success" class="success">{{ success }}</p>
       <button type="submit">Registrar</button>
+      
+      <!-- Alternância entre Modo Claro/Escuro -->
+      <div class="theme-switcher">
+        <label for="theme">Modo:</label>
+        <select id="theme" v-model="theme" @change="toggleTheme">
+          <option value="light">Claro</option>
+          <option value="dark">Escuro</option>
+        </select>
+      </div>
+      
+      <p class="back-link">
+        <router-link to="/login">Voltar para Login</router-link>
+      </p>
     </form>
-    <p class="back-link">
-      <router-link to="/login">Voltar para Login</router-link>
-    </p>
   </div>
 </template>
 
@@ -38,7 +61,8 @@ export default {
       password: '',
       showPassword: false, // Controla a visibilidade da senha
       error: '',
-      success: ''
+      success: '',
+      theme: 'light', // Tema inicial padrão
     };
   },
   methods: {
@@ -46,10 +70,13 @@ export default {
       try {
         this.error = '';
         this.success = '';
-        const response = await axios.post('http://localhost:9001/register', {
+        
+        // Faz a solicitação ao backend para registrar o usuário
+        const response = await axios.post('http://localhost:9000/register', {
           username: this.username,
-          password: this.password
+          password: this.password,
         });
+        
         this.success = response.data.message;
         this.username = '';
         this.password = '';
@@ -59,8 +86,31 @@ export default {
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword; // Alterna entre exibir/ocultar senha
+    },
+    toggleTheme() {
+      document.body.style.backgroundColor =
+        this.theme === 'dark' ? '#121212' : '#FFFFFF';
+      document.body.style.color =
+        this.theme === 'dark' ? '#FFFFFF' : '#000000';
+
+      localStorage.setItem('theme', this.theme); // Persistir o tema
+    },
+  },
+  mounted() {
+    // Recuperar tema do localStorage ao carregar o componente
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      this.theme = savedTheme;
+      this.toggleTheme();
     }
-  }
+
+    // Desativa o botão direito globalmente nesta tela
+    document.addEventListener('contextmenu', (event) => event.preventDefault());
+  },
+  beforeUnmount() {
+    // Remove o listener para evitar conflitos
+    document.removeEventListener('contextmenu', (event) => event.preventDefault());
+  },
 };
 </script>
 
@@ -80,6 +130,18 @@ export default {
 .password-field input {
   flex-grow: 1;
 }
+.password-field input::-webkit-input-placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+.password-field input:-moz-placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+.password-field input::placeholder {
+  color: #aaa;
+  font-style: italic;
+}
 .toggle-password {
   margin-left: 10px;
   background: none;
@@ -93,5 +155,12 @@ export default {
 }
 .back-link a:hover {
   text-decoration: underline;
+}
+.theme-switcher {
+  margin-top: 20px;
+}
+.theme-switcher select {
+  padding: 5px;
+  border-radius: 4px;
 }
 </style>

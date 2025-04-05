@@ -1,7 +1,7 @@
 <template>
-  <div class="update-password">
+  <div class="update-password" @contextmenu.prevent>
     <h2>Alterar Senha</h2>
-    <form @submit.prevent="updatePassword">
+    <form @submit.prevent="updatePassword" autocomplete="off">
       <div class="password-field">
         <label for="current-password">Senha Atual:</label>
         <input 
@@ -9,6 +9,10 @@
           :type="showCurrentPassword ? 'text' : 'password'" 
           id="current-password" 
           placeholder="Digite sua senha atual" 
+          autocomplete="off"
+          @copy.prevent 
+          @paste.prevent 
+          @cut.prevent 
         />
         <button type="button" class="toggle-password" @click="toggleCurrentPasswordVisibility">
           {{ showCurrentPassword ? '🙈' : '👁️' }}
@@ -21,6 +25,10 @@
           :type="showNewPassword ? 'text' : 'password'" 
           id="new-password" 
           placeholder="Digite a nova senha" 
+          autocomplete="off"
+          @copy.prevent 
+          @paste.prevent 
+          @cut.prevent 
         />
         <button type="button" class="toggle-password" @click="toggleNewPasswordVisibility">
           {{ showNewPassword ? '🙈' : '👁️' }}
@@ -29,10 +37,20 @@
       <p v-if="error" class="error">{{ error }}</p>
       <p v-if="success" class="success">{{ success }}</p>
       <button type="submit">Atualizar Senha</button>
+      
+      <!-- Alternância de Tema -->
+      <div class="theme-switcher">
+        <label for="theme">Modo:</label>
+        <select id="theme" v-model="theme" @change="toggleTheme">
+          <option value="light">Claro</option>
+          <option value="dark">Escuro</option>
+        </select>
+      </div>
+      
+      <p class="back-link">
+        <router-link to="/login">Voltar para Login</router-link>
+      </p>
     </form>
-    <p class="back-link">
-      <router-link to="/login">Voltar para Login</router-link>
-    </p>
   </div>
 </template>
 
@@ -44,10 +62,11 @@ export default {
     return {
       currentPassword: '',
       newPassword: '',
-      showCurrentPassword: false, // Controla a visibilidade da senha atual
-      showNewPassword: false, // Controla a visibilidade da nova senha
+      showCurrentPassword: false, // Controla visibilidade da senha atual
+      showNewPassword: false, // Controla visibilidade da nova senha
       error: '',
-      success: ''
+      success: '',
+      theme: 'light', // Tema inicial padrão
     };
   },
   methods: {
@@ -57,13 +76,13 @@ export default {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Usuário não autenticado.');
 
-        const response = await axios.put('http://localhost:9001/update-password', {
+        const response = await axios.put('http://localhost:9000/update-password', {
           currentPassword: this.currentPassword,
-          newPassword: this.newPassword
+          newPassword: this.newPassword,
         }, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         this.success = response.data.message;
@@ -78,8 +97,31 @@ export default {
     },
     toggleNewPasswordVisibility() {
       this.showNewPassword = !this.showNewPassword; // Alterna visibilidade da nova senha
+    },
+    toggleTheme() {
+      document.body.style.backgroundColor =
+        this.theme === 'dark' ? '#121212' : '#FFFFFF';
+      document.body.style.color =
+        this.theme === 'dark' ? '#FFFFFF' : '#000000';
+
+      localStorage.setItem('theme', this.theme); // Persistir o tema
+    },
+  },
+  mounted() {
+    // Recuperar tema do localStorage ao carregar o componente
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      this.theme = savedTheme;
+      this.toggleTheme();
     }
-  }
+
+    // Desativa o botão direito na página
+    document.addEventListener('contextmenu', (event) => event.preventDefault());
+  },
+  beforeUnmount() {
+    // Remove o listener de botão direito ao desmontar o componente
+    document.removeEventListener('contextmenu', (event) => event.preventDefault());
+  },
 };
 </script>
 
@@ -112,5 +154,12 @@ export default {
 }
 .back-link a:hover {
   text-decoration: underline;
+}
+.theme-switcher {
+  margin-top: 20px;
+}
+.theme-switcher select {
+  padding: 5px;
+  border-radius: 4px;
 }
 </style>

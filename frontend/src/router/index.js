@@ -5,6 +5,7 @@ import UpdateUser from '../components/UpdateUser.vue';
 import UpdatePassword from '../components/UpdatePassword.vue';
 import DeleteUser from '../components/DeleteUser.vue';
 import PasswordGenerator from '../components/PasswordGenerator.vue';
+import RecoverPassword from '../components/RecoverPassword.vue';
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -18,7 +19,8 @@ const routes = [
   },
   { path: '/update-user', name: 'UpdateUser', component: UpdateUser },
   { path: '/update-password', name: 'UpdatePassword', component: UpdatePassword },
-  { path: '/delete-user', name: 'DeleteUser', component: DeleteUser }
+  { path: '/delete-user', name: 'DeleteUser', component: DeleteUser },
+  { path: '/recover-password', component: RecoverPassword }
 ];
 
 const router = createRouter({
