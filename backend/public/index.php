@@ -220,6 +220,74 @@ Flight::route('GET /validate-token', function() use ($key) {
     }
 });
 
+// Adição das rotas para 2FA
+// Rota para gerar QR Code e chave secreta para 2FA
+Flight::route('POST /generate-2fa', function() use ($key) {
+    $headers = getallheaders();
+
+    if (!isset($headers['Authorization'])) {
+        Flight::halt(401, json_encode(['error' => 'Authorization header is required.']));
+        return;
+    }
+
+    $token = str_replace('Bearer ', '', $headers['Authorization']);
+
+    try {
+        $decoded = JWT::decode($token, new Key($key, 'HS256'));
+
+        require_once '../app/libraries/GoogleAuthenticator.php';
+        $gAuth = new PHPGangsta_GoogleAuthenticator();
+
+        // Gera uma chave secreta única para o usuário
+        $secret = $gAuth->createSecret();
+
+        // Gera o QR Code com o nome do app e a chave secreta
+        $qrCodeUrl = $gAuth->getQRCodeGoogleUrl('NomeDoApp', $secret);
+
+        // Retorna o QR Code e a chave secreta ao frontend
+        echo json_encode(['qrCodeUrl' => $qrCodeUrl, 'secret' => $secret]);
+    } catch (Exception $e) {
+        Flight::halt(500, json_encode(['error' => 'Failed to generate 2FA.', 'details' => $e->getMessage()]));
+    }
+});
+
+// Rota para validar o código 2FA
+Flight::route('POST /validate-2fa', function() use ($key) {
+    $headers = getallheaders();
+
+    if (!isset($headers['Authorization'])) {
+        Flight::halt(401, json_encode(['error' => 'Authorization header is required.']));
+        return;
+    }
+
+    $token = str_replace('Bearer ', '', $headers['Authorization']);
+
+    try {
+        $decoded = JWT::decode($token, new Key($key, 'HS256'));
+
+        require_once '../app/libraries/GoogleAuthenticator.php';
+        $gAuth = new PHPGangsta_GoogleAuthenticator();
+
+        $request = Flight::request()->data;
+
+        if (!isset($request->code) || !isset($request->secret)) {
+            Flight::halt(400, json_encode(['error' => 'Code and secret are required.']));
+            return;
+        }
+
+        // Valida o código inserido pelo usuário
+        $isValid = $gAuth->verifyCode($request->secret, $request->code, 2); // 2 = tolerância de intervalos
+
+        if ($isValid) {
+            echo json_encode(['message' => '2FA validation successful!', 'isValid' => true]);
+        } else {
+            Flight::halt(401, json_encode(['error' => 'Invalid 2FA code.', 'isValid' => false]));
+        }
+    } catch (Exception $e) {
+        Flight::halt(500, json_encode(['error' => 'Failed to validate 2FA.', 'details' => $e->getMessage()]));
+    }
+});
+
 // Configurações especiais do Flight
 Flight::map('notFound', function() {
     header('Access-Control-Allow-Origin: http://localhost:8081');

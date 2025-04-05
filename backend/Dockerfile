@@ -60,8 +60,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copie os arquivos do projeto para o contêiner
 COPY . .
 
-# Instale as dependências do Composer
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Limpe e atualize dependências específicas do Composer
+RUN composer clear-cache && composer update --no-dev --optimize-autoloader --no-interaction || exit 1
 
 # Ajuste permissões do diretório de trabalho
 RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www

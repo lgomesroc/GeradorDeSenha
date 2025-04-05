@@ -70,13 +70,34 @@ export default {
       try {
         this.error = '';
         this.success = '';
-        
+
+        // Verifica se os campos de usuário e senha foram preenchidos (bloquear salvar vazio)
+        if (!this.username || !this.password) {
+          this.error = 'Usuário e senha são obrigatórios.';
+          return;
+        }
+
+        // Faz a solicitação ao backend para verificar se o usuário já existe
+        const userCheck = await axios.post('http://localhost:9000/user-check', {
+          username: this.username,
+        });
+
+        if (userCheck.data.exists) {
+          this.error = 'Este usuário já está cadastrado.';
+          return;
+        }
+
+        // Impede salvar usuário e senha se já estiverem cadastrados
+        if (this.error) {
+          return; // Bloqueia salvar caso haja erro de verificação
+        }
+
         // Faz a solicitação ao backend para registrar o usuário
         const response = await axios.post('http://localhost:9000/register', {
           username: this.username,
           password: this.password,
         });
-        
+
         this.success = response.data.message;
         this.username = '';
         this.password = '';

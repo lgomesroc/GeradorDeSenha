@@ -1,13 +1,15 @@
 {
-    "require": {
+   "require": {
         "mikecao/flight": "^3.15",
         "illuminate/database": "^12.4",
         "firebase/php-jwt": "^6.11",
-        "symfony/yaml": "^7.2"
+        "symfony/yaml": "^7.2",
+        "sonata-project/google-authenticator": "^2.3"
     },
     "autoload": {
         "classmap": [
-            "app/"
+            "app/",
+            "app/libraries/"
         ]
     },
     "minimum-stability": "stable",

@@ -22,15 +22,18 @@ O objetivo é demonstrar uma aplicação simples que integra frontend e backend,
 - **Nginx**: Para servir os arquivos do Swagger UI.
 - **curl**: Para download do Swagger UI.
 - **unzip**: Para extração do arquivo ZIP baixado do Swagger UI.
-- **Swagger UI**
+- **Swagger UI**: documentação de API
    - Versão: **4.15.5**.
    - Caminho de instalação: `/usr/share/nginx/html/swagger-ui/`.
+- **Sonata/GoogleAuthenticator**: 2FA
 
 ### Frontend
 - **Vue.js**
 - **Axios** (para requisições HTTP)
 - **Docker** (para containerização)
 - **Vue Router** (para gerenciamento de rotas)
+- **Vuetify**: colocar a tela em modo claro/escuro
+- **QRCode**: para gerar o QR Code da 2FA
 
 ---
 
@@ -104,7 +107,7 @@ mysql -u password_user -p
 ---
 
 ## **Detalhes de Configuração**
-### ** Instalação do Swagger UI**
+### **Instalação do Swagger UI**
 1. **Criação do diretório**:
    - Criado o diretório `/usr/share/nginx/html/swagger-ui` para armazenar os arquivos do Swagger UI.
 
@@ -119,7 +122,7 @@ mysql -u password_user -p
      - Arquivos finais: `/usr/share/nginx/html/swagger-ui/`.
    - Removidos os arquivos temporários (`swagger-ui.zip` e diretórios desnecessários).
 
-### ** Portas Expostas**
+### **Portas Expostas**
 - **9000**: Porta principal para o servidor PHP (Flight PHP).
 - **8080**: Porta para acesso ao Swagger UI.
 
@@ -185,6 +188,9 @@ mysql -u password_user -p
 - Implementada a validação de tokens JWT em todas as rotas protegidas para garantir a segurança e autenticação dos usuários.
 - Configurado o **Swagger UI** no backend para documentação e teste das APIs.
 - Acessível na porta `8080`.
+- Criadas rotas `/generate-2fa` e `/validate-2fa` para:
+  - Geração de QR Code e chave secreta usando a biblioteca PHPGangsta/GoogleAuthenticator.
+  - Validação de códigos TOTP fornecidos pelos usuários.
 
 ### Frontend
 - Configuração inicial com Vue.js.
@@ -222,14 +228,14 @@ mysql -u password_user -p
   - Bloqueado salvamento automático de login e senha no navegador.
   - Implementados eventos para bloquear copiar, colar, cortar e uso do botão direito.
   - Melhorias na Experiência do Usuário:
-  - Bloqueado o botão direito e funcionalidades de copiar, colar e cortar no campo de entrada de token.
+    - Bloqueado o botão direito e funcionalidades de copiar, colar e cortar no campo de entrada de token.
   - Bloqueio do Botão Direito:
-  - Prevenção do uso do botão direito do mouse em toda a tela.
+    - Prevenção do uso do botão direito do mouse em toda a tela.
   - Impedir Seleção de Senhas.
   - Adicionado user-select: none; no CSS para impedir que senhas sejam selecionadas.
   - Listener global implementado para bloquear qualquer tentativa de seleção de texto na página.
   - Timer de Logout Automático:
-  - Garantido que o usuário seja deslogado automaticamente após 30 minutos de inatividade, com precisão.
+    - Garantido que o usuário seja deslogado automaticamente após 30 minutos de inatividade, com precisão.
   - Botão "Gerar Senha" continua funcional e interativo.
 - Atualização: Recuperação de Senha**
   - Criada uma nova tela de **Recuperação de Senha** (`RecoverPassword.vue`).
@@ -249,6 +255,51 @@ mysql -u password_user -p
 - Tela de Recuperação de Senha (RecoverPassword.vue)
   - Implementada a funcionalidade de envio de e-mail de recuperação de senha.
   - Adicionado alternador de tema com persistência.
+- Adicionada funcionalidade de habilitação e validação de 2FA no Dashboard:
+  - Exibição de QR Code gerado pelo backend.
+  - Campo para entrada e validação de códigos TOTP com integração via Axios.
+- Tela de Cadastro de Usuário
+  - Bloqueio para salvar usuário e senha caso os campos estejam vazios.
+  - Verificação de existência de usuário e exibição de erro se já estiver cadastrado.
+
+---
+
+## **Como Contribuir**
+
+### **Fork e Clone**
+- Faça o fork deste repositório clicando no botão "Fork".
+- Clone seu fork localmente:
+  ```bash
+  git clone https://github.com/lgomesroc/GeradorDeSenhas.git
+  ```
+- Configure o Ambiente
+- Instale as dependências:
+  ```
+  composer install
+  ```
+- Crie Sua Branch
+Crie uma nova branch para suas alterações:
+   ```
+   git checkout -b feature/sua-feature
+   ```
+- Faça as Alterações
+Adicione o que quiser melhorar ou corrigir no código.
+
+- Teste Suas Alterações
+Certifique-se de que tudo funciona como esperado:
+   ```
+   docker-compose up
+   ```
+- Envie Seu Pull Request
+Commit suas alterações e envie um PR (Pull Request) para este repositório:
+   ```
+   git add .
+   git commit -m "Adicionei nova funcionalidade"
+   git push origin feature/sua-feature
+  ```
+
+## Licença
+Este projeto está licenciado sob a MIT License. Consulte o arquivo LICENSE para mais detalhes.
 
 
 ### Funcionalidades Planejadas
@@ -288,7 +339,6 @@ Melhorar o README.md com mais detalhes sobre as rotas disponíveis e como contri
 - Adicionar expiração automática de senhas antigas no banco.
 - Implementar cache para melhorar o desempenho de rotas mais acessadas.
 - Adicionar suporte para envio de notificações (ex.: e-mail ou SMS) após ações específicas.
-- Configurar autenticação de dois fatores (2FA).
 - Adicionar suporte para uploads e armazenamento de arquivos de senhas em formato seguro.
 - Implementar validação mais robusta nos dados de entrada das rotas.
 - Adicionar integração com serviços externos como APIs de segurança.

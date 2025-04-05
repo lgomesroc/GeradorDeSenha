@@ -19,6 +19,12 @@ RUN npm install -g @vue/cli
 # Instale o Vuetify diretamente como dependência
 RUN npm install vuetify
 
+# Instale Axios para requisições HTTP
+RUN npm install axios
+
+# Instale a biblioteca de QR Code, se necessário
+RUN npm install qrcode
+
 # Copie todo o código do frontend para o contêiner
 COPY . .
 

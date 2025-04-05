@@ -16,6 +16,21 @@
     <p v-if="error" class="error">{{ error }}</p>
     <button @click="logout" class="logout-btn">Sair</button>
 
+    <!-- Configuração de 2FA -->
+    <div class="twofa-section">
+      <h3>Configurar Autenticação em Dois Fatores (2FA)</h3>
+      <button @click="enable2FA">Habilitar 2FA</button>
+      <div v-if="qrCodeUrl">
+        <p>Escaneie o QR Code abaixo no Google Authenticator:</p>
+        <img :src="qrCodeUrl" alt="QR Code para 2FA" />
+      </div>
+      <div v-if="is2FAEnabled">
+        <p>Digite o código gerado pelo Google Authenticator:</p>
+        <input v-model="twoFACode" type="text" placeholder="Código 2FA" />
+        <button @click="validate2FA">Validar 2FA</button>
+      </div>
+    </div>
+
     <!-- Tema Claro/Escuro -->
     <div class="theme-switcher">
       <label for="theme">Modo:</label>
@@ -37,6 +52,9 @@ export default {
       error: '',
       logoutTimer: null, // Timer de logout automático
       theme: 'light', // Tema inicial padrão
+      is2FAEnabled: false, // Controle do estado de 2FA
+      qrCodeUrl: '', // URL do QR Code para exibir
+      twoFACode: '', // Código 2FA inserido pelo usuário
     };
   },
   methods: {
@@ -74,6 +92,44 @@ export default {
         this.passwords.push(response.data.password);
       } catch (err) {
         this.error = err.response?.data?.error || 'Erro ao gerar senha.';
+      }
+    },
+    async enable2FA() {
+      // Adiciona a funcionalidade para habilitar 2FA
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.post('http://localhost:9000/generate-2fa', {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Armazena o QR Code retornado pelo backend
+        this.qrCodeUrl = response.data.qrCodeUrl;
+        this.is2FAEnabled = true; // Ativa o estado de 2FA
+      } catch (err) {
+        this.error = err.response?.data?.error || 'Erro ao habilitar 2FA.';
+      }
+    },
+    async validate2FA() {
+      // Adiciona a funcionalidade para validar o código 2FA
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.post('http://localhost:9000/validate-2fa', {
+          code: this.twoFACode, // Envia o código inserido pelo usuário
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.data.isValid) {
+          alert('2FA Validado com sucesso!');
+        } else {
+          this.error = 'Código 2FA inválido.';
+        }
+      } catch (err) {
+        this.error = err.response?.data?.error || 'Erro ao validar 2FA.';
       }
     },
     logout(reason = 'Desconhecido') {
@@ -170,6 +226,12 @@ export default {
 .password-item {
   user-select: none; /* Impede seleção de texto */
   cursor: default; /* Remove o cursor interativo */
+}
+.twofa-section {
+  margin-top: 30px;
+}
+.twofa-section img {
+  max-width: 200px;
 }
 .theme-switcher {
   margin-top: 20px;
