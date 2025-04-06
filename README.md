@@ -50,9 +50,9 @@ O objetivo é demonstrar uma aplicação simples que integra frontend e backend,
    cd GeradorDeSenha
    ```
 2. Construa os contêineres:
-```
-docker-compose up --build
-```
+   ```
+   docker-compose up --build
+   ```
 
 ---
 
@@ -64,14 +64,14 @@ Após construir e iniciar os contêineres, siga os comandos abaixo para executar
 1. Certifique-se de que o contêiner do backend está ativo.
 
 2. Acesse o terminal do contêiner do backend:
-```
-docker exec -it backend bash
-```
+   ```
+   docker exec -it backend bash
+   ```
 
 3. Execute o comando para iniciar o backend:
-```
-php -S 0.0.0.0:9000
-```
+   ```
+   php -S 0.0.0.0:9000
+   ```
 
 4. O backend estará acessível em http://localhost:9000.
 
@@ -79,14 +79,14 @@ php -S 0.0.0.0:9000
 1. Certifique-se de que o contêiner do frontend está ativo.
 
 2. Acesse o terminal do contêiner do frontend:
-```
-docker exec -it frontend bash
-```
+   ```
+   docker exec -it frontend bash
+   ```
 
 3. Execute o comando para iniciar o frontend no modo de desenvolvimento:
-```
-npm run serve
-```
+   ```
+   npm run serve
+   ```
 
 4. O frontend estará acessível em http://localhost:8081.
 
@@ -94,14 +94,14 @@ npm run serve
 1. Certifique-se de que o contêiner do MySQL está ativo.
 
 2. Para acessar o banco de dados MySQL diretamente:
-```
-docker exec -it mysql bash
-```
+   ```
+   docker exec -it mysql bash
+   ```
 
 3. Dentro do contêiner, conecte-se ao MySQL:
-```
-mysql -u password_user -p
-```
+   ```
+   mysql -u password_user -p
+   ```
 4. Insira a senha configurada no contêiner para acessar o MySQL. A partir daí, você pode executar comandos SQL diretamente.
 
 ---
@@ -129,11 +129,18 @@ mysql -u password_user -p
 ---
 
 ## Rotas do Backend
+- `/`: rota inicial.
 - **POST** `/login`: autentica o usuário e retorna um token JWT.
 - **POST** `/register`: registra um novo usuário.
 - **GET** `/validate-token`: valida o token JWT enviado pelo frontend.
 - **POST** `/generate-password`: gera uma nova senha.
 - **GET** `/list-passwords`: retorna a lista de senhas geradas.
+- **GET** `/db-test`: Teste de conexão com o banco de dados.
+- **POST** `/recover-password`: Recuperação de senha.
+- **POST** `/save-password`: Salvar senha no banco.
+- **POST** `/verify-password`: Verificar senha fornecida pelo usuário.
+- **POST** `/generate-2fa`: Gerar código 2FA.
+- **POST** `/validate-2fa`: Validar código 2FA.
 
 ---
 
@@ -191,6 +198,14 @@ mysql -u password_user -p
 - Criadas rotas `/generate-2fa` e `/validate-2fa` para:
   - Geração de QR Code e chave secreta usando a biblioteca PHPGangsta/GoogleAuthenticator.
   - Validação de códigos TOTP fornecidos pelos usuários.
+- Adicionada funcionalidade que valida as senhas no momento do cadastro de usuário no backend junto ao frontend. As regras serão executadas no backend e frontend. Essa funcionalidade garante que as senhas sigam as seguintes regras:
+  - A senha deve ter no mínimo 8 caracteres.
+  - A senha deve conter pelo menos 1 número.
+  - A senha deve incluir pelo menos 1 letra minúscula.
+  - A senha deve ter pelo menos 1 letra maiúscula.
+  - A senha deve possuir pelo menos 1 caractere especial (ex.: !@#$%^&*).
+  - Proibição de 3 caracteres consecutivos iguais, sejam números ou letras repetidas (ex.: "aaa", "111").
+- Outra validação idêntica é realizada para garantir que as regras sejam aplicadas mesmo se o frontend for burlado.
 
 ### Frontend
 - Configuração inicial com Vue.js.
@@ -261,6 +276,18 @@ mysql -u password_user -p
 - Tela de Cadastro de Usuário
   - Bloqueio para salvar usuário e senha caso os campos estejam vazios.
   - Verificação de existência de usuário e exibição de erro se já estiver cadastrado.
+- Adicionada funcionalidade que valida as senhas no momento do cadastro de usuário no frontend junto ao backend.
+Essa funcionalidade garante que as senhas sigam as seguintes regras:
+  - A senha deve ter no mínimo 8 caracteres.
+  - A senha deve conter pelo menos 1 número.
+  - A senha deve incluir pelo menos 1 letra minúscula.
+  - A senha deve ter pelo menos 1 letra maiúscula.
+  - A senha deve possuir pelo menos 1 caractere especial (ex.: !@#$%^&*).
+  - Proibição de 3 caracteres consecutivos iguais, sejam números ou letras repetidas (ex.: "aaa", "111").
+- Foram adicionadas mensagens claras e orientativas para o usuário quando:
+  - A senha fornecida não cumpre os requisitos das regras.
+  - O cadastro foi realizado com sucesso.
+- Uma função chamada validatePassword() verifica se a senha segue as regras. Se não, exibe um aviso ao usuário, impedindo o envio da senha ao backend.
 
 ---
 
@@ -269,14 +296,14 @@ mysql -u password_user -p
 ### **Fork e Clone**
 - Faça o fork deste repositório clicando no botão "Fork".
 - Clone seu fork localmente:
-  ```bash
-  git clone https://github.com/lgomesroc/GeradorDeSenhas.git
-  ```
+   ```
+   git clone https://github.com/lgomesroc/GeradorDeSenhas.git
+   ```
 - Configure o Ambiente
 - Instale as dependências:
-  ```
-  composer install
-  ```
+   ```
+   composer install
+   ```
 - Crie Sua Branch
 Crie uma nova branch para suas alterações:
    ```
@@ -385,7 +412,6 @@ Melhorar o README.md com mais detalhes sobre as rotas disponíveis e como contri
 - Implementar sistema de notificações em tempo real (ex.: **Socket.IO** para eventos).
 - Adicionar verificações para evitar duplicatas ao salvar senhas.
 - Configurar expiração automática de senhas antigas no banco.
-- Configurar autenticação de dois fatores (2FA).
 - Adicionar suporte para envio de notificações (ex.: e-mail ou SMS).
 - Adicionar suporte para múltiplos bancos de dados (PostgreSQL, etc.).
 - Configurar HTTPS com certificados SSL.

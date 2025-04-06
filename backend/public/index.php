@@ -155,10 +155,18 @@ Flight::route('POST /register', function() {
     $request = Flight::request()->data;
 
     if (!isset($request->username) || !isset($request->password)) {
-        Flight::halt(400, json_encode(['error' => 'Username and password are required.']));
+        Flight::halt(400, json_encode(['error' => 'Usuário e senha são obrigatórios.']));
         return;
     }
 
+    // Valida a senha
+    $passwordError = validatePassword($request->password);
+    if ($passwordError) {
+        Flight::halt(400, json_encode(['error' => $passwordError]));
+        return;
+    }
+
+    // Criptografar a senha com bcrypt
     $hashedPassword = password_hash($request->password, PASSWORD_BCRYPT);
 
     try {
@@ -166,9 +174,9 @@ Flight::route('POST /register', function() {
             'username' => $request->username,
             'password' => $hashedPassword
         ]);
-        echo json_encode(['message' => 'User registered successfully!']);
+        echo json_encode(['message' => 'Usuário registrado com sucesso!']);
     } catch (Exception $e) {
-        Flight::halt(500, json_encode(['error' => 'Failed to register user.', 'details' => $e->getMessage()]));
+        Flight::halt(500, json_encode(['error' => 'Erro ao registrar usuário.', 'details' => $e->getMessage()]));
     }
 });
 
@@ -219,6 +227,42 @@ Flight::route('GET /validate-token', function() use ($key) {
         Flight::halt(401, json_encode(['error' => 'Invalid token.', 'details' => $e->getMessage()]));
     }
 });
+
+function validatePassword($password) {
+    // Verifica o comprimento mínimo de 8 caracteres
+    if (strlen($password) < 8) {
+        return "A senha deve ter no mínimo 8 caracteres.";
+    }
+
+    // Verifica se há pelo menos 1 número
+    if (!preg_match('/\d/', $password)) {
+        return "A senha deve conter pelo menos 1 número.";
+    }
+
+    // Verifica se há pelo menos 1 letra minúscula
+    if (!preg_match('/[a-z]/', $password)) {
+        return "A senha deve conter pelo menos 1 letra minúscula.";
+    }
+
+    // Verifica se há pelo menos 1 letra maiúscula
+    if (!preg_match('/[A-Z]/', $password)) {
+        return "A senha deve conter pelo menos 1 letra maiúscula.";
+    }
+
+    // Verifica se há pelo menos 1 caractere especial
+    if (!preg_match('/[\W_]/', $password)) {
+        return "A senha deve conter pelo menos 1 caractere especial.";
+    }
+
+    // Verifica se há 3 letras ou números repetidos consecutivamente
+    if (preg_match('/(.)\1{2,}/', $password)) {
+        return "A senha não pode ter 3 caracteres consecutivos iguais.";
+    }
+
+    // Caso passe em todas as validações
+    return null;
+}
+
 
 // Adição das rotas para 2FA
 // Rota para gerar QR Code e chave secreta para 2FA

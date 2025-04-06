@@ -33,6 +33,10 @@
       </div>
       <p v-if="error" class="error">{{ error }}</p>
       <p v-if="success" class="success">{{ success }}</p>
+
+      <!-- Linha adicionada para o aviso de sucesso -->
+      <p v-if="successNotification" class="success-notification">Usuário cadastrado com sucesso!</p>
+
       <button type="submit">Registrar</button>
       
       <!-- Alternância entre Modo Claro/Escuro -->
@@ -62,6 +66,7 @@ export default {
       showPassword: false, // Controla a visibilidade da senha
       error: '',
       success: '',
+      successNotification: false, // Controle para exibir o aviso de sucesso
       theme: 'light', // Tema inicial padrão
     };
   },
@@ -70,10 +75,18 @@ export default {
       try {
         this.error = '';
         this.success = '';
+        this.successNotification = false;
 
         // Verifica se os campos de usuário e senha foram preenchidos (bloquear salvar vazio)
         if (!this.username || !this.password) {
           this.error = 'Usuário e senha são obrigatórios.';
+          return;
+        }
+
+        // Regras de validação no frontend (para avisar antes de enviar ao backend)
+        const passwordError = this.validatePassword(this.password);
+        if (passwordError) {
+          this.error = passwordError; // Mostra o erro ao usuário
           return;
         }
 
@@ -87,11 +100,6 @@ export default {
           return;
         }
 
-        // Impede salvar usuário e senha se já estiverem cadastrados
-        if (this.error) {
-          return; // Bloqueia salvar caso haja erro de verificação
-        }
-
         // Faz a solicitação ao backend para registrar o usuário
         const response = await axios.post('http://localhost:9000/register', {
           username: this.username,
@@ -99,11 +107,37 @@ export default {
         });
 
         this.success = response.data.message;
+        this.successNotification = true; // Ativa a notificação de sucesso
+        setTimeout(() => {
+          this.successNotification = false; // Remove a notificação após alguns segundos
+        }, 5000);
+
         this.username = '';
         this.password = '';
       } catch (err) {
         this.error = err.response?.data?.error || 'Erro ao registrar.';
       }
+    },
+    validatePassword(password) {
+      if (password.length < 8) {
+        return 'A senha deve ter no mínimo 8 caracteres.';
+      }
+      if (!/\d/.test(password)) {
+        return 'A senha deve conter pelo menos 1 número.';
+      }
+      if (!/[a-z]/.test(password)) {
+        return 'A senha deve conter pelo menos 1 letra minúscula.';
+      }
+      if (!/[A-Z]/.test(password)) {
+        return 'A senha deve conter pelo menos 1 letra maiúscula.';
+      }
+      if (!/[\W_]/.test(password)) {
+        return 'A senha deve conter pelo menos 1 caractere especial.';
+      }
+      if (/(\w)\1{2,}/.test(password)) {
+        return 'A senha não pode ter 3 caracteres consecutivos iguais.';
+      }
+      return null;
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword; // Alterna entre exibir/ocultar senha
@@ -183,5 +217,13 @@ export default {
 .theme-switcher select {
   padding: 5px;
   border-radius: 4px;
+}
+.success-notification {
+  color: white;
+  background-color: green;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+  margin: 10px 0;
 }
 </style>

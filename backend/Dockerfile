@@ -68,8 +68,9 @@ RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www
 
 # Exponha a porta usada pelo Flight PHP
 EXPOSE 9000
-EXPOSE 8080
+
 # Swagger UI será exposto nesta porta
+EXPOSE 8080
 
 # Comando para iniciar o servidor PHP embutido
 CMD ["php", "-S", "0.0.0.0:9000", "-t", "public"]

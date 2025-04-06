@@ -82,6 +82,12 @@ export default {
 
       try {
         this.error = '';
+
+        // Previne que o navegador salve o usuário e a senha automaticamente
+        if ('credentials' in navigator) {
+          navigator.credentials.preventSilentAccess();
+        }
+
         const response = await fetch('http://localhost:9000/login', {
           method: 'POST',
           body: JSON.stringify({
@@ -93,14 +99,17 @@ export default {
 
         const data = await response.json();
         if (!data.token) throw new Error('Token não gerado.');
-        localStorage.setItem('token', data.token);
 
+        localStorage.setItem('token', data.token);
         alert('Login realizado com sucesso!');
         this.$router.push('/password-generator');
       } catch (err) {
         this.attemptsLeft--;
 
-        if (this.attemptsLeft > 0) {
+        // Adiciona verificação para evitar erro de mensagem genérica
+        if (err.response && err.response.status === 401) {
+          this.error = 'Usuário ou senha incorretos.';
+        } else if (this.attemptsLeft > 0) {
           this.error = `Erro ao fazer login. Você tem mais ${this.attemptsLeft} tentativa(s).`;
         } else {
           this.error = 'Você excedeu o limite de tentativas. Usuário bloqueado por 1 hora.';
